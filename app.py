@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from keras.models import load_model
-from keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.models import load_model
+from tensorflow.keras.applications.resnet50 import preprocess_input
 from PIL import Image
 import numpy as np
 import os, time, traceback, dotenv
