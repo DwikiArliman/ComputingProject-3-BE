@@ -6,13 +6,27 @@ from PIL import Image
 import numpy as np
 import os, time, traceback, dotenv
 from groq import Groq
+import gdown  # <--- Tambahkan ini
 
 app = Flask(__name__)
 CORS(app)
 dotenv.load_dotenv()
 
-# Load model lokal satu kali saat startup
-model = load_model('./model/model_resnet50.h5')
+# === [ DOWNLOAD MODEL DARI GOOGLE DRIVE JIKA BELUM ADA ] ===
+model_path = './model/model_resnet50.h5'
+file_id = '1sW0Qg2A_qMzfwfE2GxnwGkQ5xZv4Xqj2'  # Ganti sesuai ID file model kamu
+
+
+if not os.path.exists(model_path):
+    print("📥 Downloading model from Google Drive...")
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(url, model_path, quiet=False)
+else:
+    print("✅ Model sudah tersedia secara lokal.")
+
+# === [ LOAD MODEL ] ===
+model = load_model(model_path)
 output_class = ["glioma", "healthy", "meningioma", "pituitary"]
 UPLOAD_FOLDER = './img_raw'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -58,7 +72,7 @@ def ai_description(category):
             messages=messages
         )
         reply = chat.choices[0].message.content
-        
+
         # Pisahkan deskripsi dan solusi berdasarkan titik (.)
         sentences = reply.split('. ')
         description = sentences[0] + '.' if len(sentences) > 0 else "Deskripsi tidak tersedia."
