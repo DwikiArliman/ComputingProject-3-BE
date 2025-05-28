@@ -5,7 +5,7 @@ numpy
 pillow
 requests
 tensorflow-cpu==2.13.1
-git+https://github.com/groq/groq-python.git
+groq==0.25.0
 gunicorn
 python-dotenv
 gdown

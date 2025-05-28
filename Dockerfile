@@ -1,9 +1,6 @@
 # python version
 FROM python:3.8-slim
 
-# install git (untuk install dari GitHub)
-RUN apt-get update && apt-get install -y git
-
 # working directory
 WORKDIR /app
 
