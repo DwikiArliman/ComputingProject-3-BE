@@ -5,7 +5,7 @@ from tensorflow.keras.preprocessing import image
 from PIL import Image
 import numpy as np
 import os, time, traceback, dotenv
-from groq import GroqClient
+from groq import Groq
 import gdown
 
 app = Flask(__name__)
@@ -62,7 +62,7 @@ def ai_description(category):
             print("❌ API_GROQ token not found in environment.")
             return "Deskripsi tidak tersedia (token tidak ditemukan)."
 
-        client = GroqClient(api_key=token)
+        client = Groq(api_key=token)
         messages = [
             {
                 "role": "system",
