@@ -15,6 +15,7 @@ dotenv.load_dotenv()
 # === [ DOWNLOAD MODEL DARI GOOGLE DRIVE JIKA BELUM ADA ] ===
 model_path = './comproteam3/BatikModel.h5'
 file_id = '1qPo3_Lf9IX7Ip7qrL8ifCG4Zvcq9SUc1'  # ID file Google Drive
+#https://drive.google.com/file/d/1qPo3_Lf9IX7Ip7qrL8ifCG4Zvcq9SUc1/view?usp=sharing
 
 if not os.path.exists(model_path):
     print("📥 Downloading model from Google Drive...")
@@ -67,7 +68,7 @@ def ai_description(category):
                 "role": "system",
                 "content": (
                     "Anda adalah seorang ahli seni budaya batik Indonesia."
-                    " Berikan deskripsi singkat (maksimal 3 kalimat) tentang motif batik yang disebutkan,"
+                    " Berikan deskripsi panjang (10 kalimat) tentang motif batik yang disebutkan,"
                     " jawaban dalam bahasa Indonesia."
                 )
             },
@@ -82,8 +83,10 @@ def ai_description(category):
         )
         reply = chat.choices[0].message.content
 
-        sentences = reply.split('. ')
-        description = sentences[0] + '.' if len(sentences) > 0 else "Deskripsi tidak tersedia."
+        #sentences = reply.split('. ')
+        #description = sentences[0] + '.' if len(sentences) > 0 else "Deskripsi tidak tersedia."
+        description = reply if reply else "Deskripsi tidak tersedia."
+
 
         return description
     except Exception as e:
