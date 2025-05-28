@@ -4,7 +4,7 @@ keras
 numpy
 pillow
 requests
-tensorflow-cpu==2.16.1
+tensorflow-cpu==2.13.1
 groq
 gunicorn
 python-dotenv
