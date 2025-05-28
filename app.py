@@ -5,7 +5,7 @@ from tensorflow.keras.preprocessing import image
 from PIL import Image
 import numpy as np
 import os, time, traceback, dotenv
-from groq import Client
+from groq import Groq
 import gdown
 
 app = Flask(__name__)
@@ -62,15 +62,14 @@ def ai_description(category):
             print("❌ API_GROQ token not found in environment.")
             return "Deskripsi tidak tersedia (token tidak ditemukan)."
 
-        client = Client(api_key=token)  # ✅ Gunakan Client, bukan Groq
-
+        client = Groq(api_key=token)
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "Anda adalah seorang ahli seni budaya batik Indonesia. "
-                    "Berikan deskripsi panjang (10 kalimat) tentang motif batik yang disebutkan, "
-                    "jawaban dalam bahasa Indonesia."
+                    "Anda adalah seorang ahli seni budaya batik Indonesia."
+                    " Berikan deskripsi panjang (10 kalimat) tentang motif batik yang disebutkan,"
+                    " jawaban dalam bahasa Indonesia."
                 )
             },
             {
@@ -78,17 +77,18 @@ def ai_description(category):
                 "content": category
             }
         ]
-
         chat = client.chat.completions.create(
             model="llama3-70b-8192",
             messages=messages
         )
-
         reply = chat.choices[0].message.content
+
+        #sentences = reply.split('. ')
+        #description = sentences[0] + '.' if len(sentences) > 0 else "Deskripsi tidak tersedia."
         description = reply if reply else "Deskripsi tidak tersedia."
 
-        return description
 
+        return description
     except Exception as e:
         print("❌ Error generating description:", e)
         traceback.print_exc()
