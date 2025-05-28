@@ -16,7 +16,6 @@ dotenv.load_dotenv()
 model_path = './model/model_resnet50.h5'
 file_id = '1sW0Qg2A_qMzfwfE2GxnwGkQ5xZv4Xqj2'  # Ganti sesuai ID file model kamu
 
-
 if not os.path.exists(model_path):
     print("📥 Downloading model from Google Drive...")
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
@@ -137,4 +136,4 @@ def upload():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
