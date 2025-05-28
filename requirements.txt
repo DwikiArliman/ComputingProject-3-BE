@@ -4,8 +4,8 @@ keras
 numpy
 pillow
 requests
-tensorflow-cpu==2.13.1
-groq==0.4.1
+tensorflow-cpu
+groq
 gunicorn
 python-dotenv
 gdown
