@@ -20,5 +20,4 @@ ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_ENV=development
 
 # command running flask
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "app:app"]
-#CMD ["flask", "run"]
+CMD ["flask", "run"]
