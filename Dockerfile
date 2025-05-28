@@ -1,5 +1,5 @@
 # python version
-FROM python:3.10-slim
+FROM python:3.8-slim
 
 # working directory
 WORKDIR /app
@@ -20,4 +20,5 @@ ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_ENV=development
 
 # command running flask
-CMD ["flask", "run"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "app:app"]
+#CMD ["flask", "run"]
