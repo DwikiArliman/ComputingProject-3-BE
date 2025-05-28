@@ -1,20 +1,20 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
-from tensorflow.keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.preprocessing import image
 from PIL import Image
 import numpy as np
 import os, time, traceback, dotenv
 from groq import Groq
-import gdown  # <--- Tambahkan ini
+import gdown
 
 app = Flask(__name__)
 CORS(app)
 dotenv.load_dotenv()
 
 # === [ DOWNLOAD MODEL DARI GOOGLE DRIVE JIKA BELUM ADA ] ===
-model_path = './model/model_resnet50.h5'
-file_id = '1sW0Qg2A_qMzfwfE2GxnwGkQ5xZv4Xqj2'  # Ganti sesuai ID file model kamu
+model_path = './comproteam3/BatikModel.h5'
+file_id = '1qPo3_Lf9IX7Ip7qrL8ifCG4Zvcq9SUc1'  # ID file Google Drive
 
 if not os.path.exists(model_path):
     print("📥 Downloading model from Google Drive...")
@@ -26,39 +26,49 @@ else:
 
 # === [ LOAD MODEL ] ===
 model = load_model(model_path)
-output_class = ["glioma", "healthy", "meningioma", "pituitary"]
+model.make_predict_function()  # optional, depending on TensorFlow version
+
+# === [ DAFTAR KELAS OUTPUT ] ===
+output_class = [
+    'Batik Bali',
+    'Batik Betawi',
+    'Batik Cendrawasih',
+    'Batik Dayak',
+    'Batik Geblek Renteng',
+    'Batik Ikat Celup',
+    'Batik Insang',
+    'Batik Kawung',
+    'Batik Lasem',
+    'Batik Megamendung',
+    'Batik Pala',
+    'Batik Parang',
+    'Batik Poleng',
+    'Batik Sekar Jagad',
+    'Batik Tambal'
+]
+
 UPLOAD_FOLDER = './img_raw'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
-    return "<h1>Brain MRI Classifier + AI Describer</h1>"
-
-def preprocessing_input(img_path):
-    img = Image.open(img_path).convert("RGB")
-    img = img.resize((224, 224))
-    img = np.array(img)
-    img = np.expand_dims(img, axis=0)
-    img = preprocess_input(img)
-    return img
+    return "<h1>Batik + AI Describer</h1>"
 
 def ai_description(category):
     try:
         token = os.getenv("API_GROQ")
         if not token:
             print("❌ API_GROQ token not found in environment.")
-            return "Deskripsi tidak tersedia (token tidak ditemukan).", "Solusi tidak tersedia (token tidak ditemukan)."
+            return "Deskripsi tidak tersedia (token tidak ditemukan)."
 
         client = Groq(api_key=token)
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "Anda adalah seorang ahli medis spesialis otak. "
-                    "Berikan deskripsi singkat (maksimal 2 kalimat) tentang kondisi atau tumor otak yang disebutkan, "
-                    "termasuk karakteristik utama dan metode penanganannya. "
-                    "Kemudian, berikan pencegahan atau tindakan medis yang dapat diambil (maksimal 1 kalimat). "
-                    "Jawaban dalam bahasa Indonesia."
+                    "Anda adalah seorang ahli seni budaya batik Indonesia."
+                    " Berikan deskripsi singkat (maksimal 3 kalimat) tentang motif batik yang disebutkan,"
+                    " jawaban dalam bahasa Indonesia."
                 )
             },
             {
@@ -72,32 +82,41 @@ def ai_description(category):
         )
         reply = chat.choices[0].message.content
 
-        # Pisahkan deskripsi dan solusi berdasarkan titik (.)
         sentences = reply.split('. ')
         description = sentences[0] + '.' if len(sentences) > 0 else "Deskripsi tidak tersedia."
-        solution = sentences[1] + '.' if len(sentences) > 1 else "Solusi tidak tersedia."
 
-        return description, solution
+        return description
     except Exception as e:
         print("❌ Error generating description:", e)
         traceback.print_exc()
-        return "Deskripsi tidak tersedia (error API).", "Solusi tidak tersedia (error API)."
+        return "Deskripsi tidak tersedia (error API)."
 
 def predict_image(img_path):
     try:
-        img = preprocessing_input(img_path)
-        result = model.predict(img)[0]
-        predicted_class_idx = np.argmax(result)
-        predicted_class = output_class[predicted_class_idx]
-        predicted_probability = result[predicted_class_idx]
+        # === PREPROCESS IMAGE (SAMA SEPERTI KODE PERTAMA) ===
+        img = image.load_img(img_path, target_size=(224, 224))
+        img = image.img_to_array(img)
+        img = img / 255.0
+        img = np.expand_dims(img, axis=0)
 
-        description, solution = ai_description(predicted_class)
+        # === PREDICT WITH MODEL ===
+        pred = model.predict(img)
+        predicted_class_idx = np.argmax(pred, axis=1)[0]
+        predicted_probability = pred[0][predicted_class_idx]
+
+        # === GET CLASS NAME FROM output_class ===
+        if predicted_class_idx < len(output_class):
+            predicted_class = output_class[predicted_class_idx]
+        else:
+            predicted_class = "Unknown"
+
+        # === GET DESCRIPTION FROM AI ===
+        description = ai_description(predicted_class)
 
         return {
             "accuracy": f"{predicted_probability:.2%}",
-            "class_category": predicted_class.title(),
-            "description": description,
-            "solution": solution
+            "class_category": predicted_class.title(),  # Ensure from predicted_class
+            "description": description
         }
 
     except Exception as e:
@@ -106,8 +125,7 @@ def predict_image(img_path):
         return {
             "accuracy": "-%",
             "class_category": "Not Found",
-            "description": "Not Found",
-            "solution": "Not Found"
+            "description": "Not Found"
         }
 
 @app.route('/upload', methods=['POST'])
@@ -136,4 +154,4 @@ def upload():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True, port=8000)
