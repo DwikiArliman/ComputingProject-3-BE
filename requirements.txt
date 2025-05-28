@@ -1,8 +1,8 @@
-Flask
+flask
 flask-cors
 keras
 numpy
-Pillow
+pillow
 requests
 tensorflow-cpu==2.16.1
 groq
